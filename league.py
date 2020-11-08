@@ -1,0 +1,83 @@
+import discord
+import requests
+
+def get_links():
+    text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
+    save = []
+    for line in text:
+        line = line.strip()
+        if line.startswith('plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/'):
+            save.append(line)
+        elif line.startswith('plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/') and 'uncentered' not in line and '.jpg' in line:
+            save.append(line)
+    return save
+
+def compare_links(allstuff, savefilepath):
+    oldstuff = []
+    with open(savefilepath, 'r') as f:
+        text = f.readlines()
+    for line in text:
+            oldstuff.append(line.strip())
+    newstuff = []
+    for link in allstuff:
+        if link in oldstuff:
+            continue
+        newstuff.append(link)
+    for link in newstuff:
+        with open(savefilepath, 'a') as f:
+            f.write(link + '\n')
+    return newstuff
+
+def parse_info():
+    newstuff = compare_links(get_links(), 'savefile.txt')
+    backgrounds = []
+    icons = []
+    for link in newstuff:
+        if link.startswith('plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/'):
+            combined = {}
+            linkid = link.split('plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/')[1].split('/')[1].split('.')[0]
+            folderid = link.split('plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/')[1].split('/')[0]
+            combined['folderid'] = folderid
+            combined['linkid'] = linkid
+            backgrounds.append(combined)
+        if link.startswith('plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/'):
+            link = link.split('plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/')[1].split('.')[0]
+            icons.append(link)
+    return backgrounds, icons
+
+def discord_bot():
+    client = discord.Client()
+
+    @client.event
+    async def on_ready():
+        print('We have logged in as {0.user}'.format(client))
+
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
+        if message.content.startswith('!refresh'):
+            await message.channel.send('Refreshing...')
+            icons = parse_info()[1]
+            backgrounds = parse_info()[0]
+            if icons == [] and backgrounds == []:
+                await message.channel.send('No changes found, try to refresh later.')
+                return
+            for background in backgrounds:
+                folderid = background['folderid']
+                linkid = background['linkid']
+                print(linkid)
+                imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/' + str(folderid) + '/' + str(linkid) + '.jpg'
+                embedVar = discord.Embed(title='ID: ' + str(linkid), description='Profile Background', color=0xE88DAF)
+                embedVar.set_image(url=imageurl)
+                await message.channel.send(embed=embedVar)
+            for icon in icons:
+                print(icon)
+                imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/' + str(icon) + '.jpg'
+                embedVar = discord.Embed(title="ID: " + str(icon), description='Icon', color=0x00ff00)
+                embedVar.set_image(url=imageurl)
+                await message.channel.send(embed=embedVar)
+            await message.channel.send('Finished refreshing.')
+    client.run('NzE0NTE2OTk4NDk4OTQzMTE3.Xsvzzw.Wsznk2mpf0ZcFhBi_kFNSMw3Fec')
+
+discord_bot()
