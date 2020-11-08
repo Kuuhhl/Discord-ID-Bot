@@ -1,6 +1,9 @@
 import discord
 import requests
 
+token = '' #token for discord-bot
+channelid = #Channel-ID to send new IDs to
+
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
     save = []
@@ -56,28 +59,30 @@ def discord_bot():
     async def on_message(message):
         if message.author == client.user:
             return
-        if message.content.startswith('!refresh'):
+        if message.content.startswith('!refresh') and message.channel.name == 'bot':
             await message.channel.send('Refreshing...')
-            icons = parse_info()[1]
-            backgrounds = parse_info()[0]
+            idchannel = client.get_channel(channelid)
+            parsed = parse_info()
+            icons = parsed[1]
+            backgrounds = parsed[0]
             if icons == [] and backgrounds == []:
-                await message.channel.send('No changes found, try to refresh later.')
+                await message.channel.send('No new IDs found. Try again later.')
                 return
             for background in backgrounds:
                 folderid = background['folderid']
                 linkid = background['linkid']
-                print(linkid)
+                print('background')
                 imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/' + str(folderid) + '/' + str(linkid) + '.jpg'
                 embedVar = discord.Embed(title='ID: ' + str(linkid), description='Profile Background', color=0xE88DAF)
                 embedVar.set_image(url=imageurl)
-                await message.channel.send(embed=embedVar)
+                await idchannel.send(embed=embedVar)
             for icon in icons:
-                print(icon)
+                print('icon')
                 imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/' + str(icon) + '.jpg'
                 embedVar = discord.Embed(title="ID: " + str(icon), description='Icon', color=0x00ff00)
                 embedVar.set_image(url=imageurl)
-                await message.channel.send(embed=embedVar)
+                await idchannel.send(embed=embedVar)
             await message.channel.send('Finished refreshing.')
-    client.run('NzE0NTE2OTk4NDk4OTQzMTE3.Xsvzzw.Wsznk2mpf0ZcFhBi_kFNSMw3Fec')
+    client.run(token)
 
 discord_bot()
