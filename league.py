@@ -1,9 +1,9 @@
 import discord
 import requests
-
-token = '' #token for discord-bot
-channelid = #ID of 'ID'-Channel to post in (integer)
-channellog = #ID of 'log'-Channel to post in (integer)
+import os
+token =  os.environ.get('token') #token for discord-bot
+channelid = os.environ.get('channelid') #ID of 'ID'-Channel to post in (integer)
+channellog = os.environ.get('channellog') #ID of 'log'-Channel to post in (integer)
 
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
