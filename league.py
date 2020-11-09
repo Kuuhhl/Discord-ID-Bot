@@ -2,7 +2,8 @@ import discord
 import requests
 
 token = '' #token for discord-bot
-channelid = #Channel-ID to send new IDs to
+channelid = #ID of 'ID'-Channel to post in (integer)
+channellog = #ID of 'log'-Channel to post in (integer)
 
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
@@ -54,35 +55,31 @@ def discord_bot():
     @client.event
     async def on_ready():
         print('We have logged in as {0.user}'.format(client))
-
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
-            return
-        if message.content.startswith('!refresh') and message.channel.name == 'bot':
-            await message.channel.send('Refreshing...')
-            idchannel = client.get_channel(channelid)
-            parsed = parse_info()
-            icons = parsed[1]
-            backgrounds = parsed[0]
-            if icons == [] and backgrounds == []:
-                await message.channel.send('No new IDs found. Try again later.')
-                return
+        idchannel = client.get_channel(channelid)
+        logchannel = client.get_channel(channellog)
+        await logchannel.send('Refreshing...')
+        parsed = parse_info()
+        icons = parsed[1]
+        backgrounds = parsed[0]
+        if icons == [] and backgrounds == []:
+            await logchannel.send('No new IDs found. Try again later.')
+        else:
             for background in backgrounds:
                 folderid = background['folderid']
                 linkid = background['linkid']
-                print('background')
                 imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/' + str(folderid) + '/' + str(linkid) + '.jpg'
                 embedVar = discord.Embed(title='ID: ' + str(linkid), description='Profile Background', color=0xE88DAF)
                 embedVar.set_image(url=imageurl)
                 await idchannel.send(embed=embedVar)
             for icon in icons:
-                print('icon')
                 imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/' + str(icon) + '.jpg'
                 embedVar = discord.Embed(title="ID: " + str(icon), description='Icon', color=0x00ff00)
                 embedVar.set_image(url=imageurl)
                 await idchannel.send(embed=embedVar)
-            await message.channel.send('Finished refreshing.')
+        await logchannel.send('Finished refreshing.')
+        print('Finished task. Closing...')
+        await client.logout()
+        return
     client.run(token)
 
 discord_bot()
