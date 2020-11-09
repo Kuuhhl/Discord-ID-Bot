@@ -1,10 +1,6 @@
 import discord
 import requests
 import os
-print(os.environ)
-token =  os.environ['token'] #token for discord-bot
-channelid = os.environ['channelid'] #ID of 'ID'-Channel to post in (integer)
-channellog = os.environ['channellog'] #ID of 'log'-Channel to post in (integer)
 
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
@@ -56,8 +52,8 @@ def discord_bot():
     @client.event
     async def on_ready():
         print('We have logged in as {0.user}'.format(client))
-        idchannel = client.get_channel(channelid)
-        logchannel = client.get_channel(channellog)
+        idchannel = client.get_channel(int(os.environ.get('ID_CHANNEL')))
+        logchannel = client.get_channel(int(os.environ.get('LOG_CHANNEL')))
         await logchannel.send('Refreshing...')
         parsed = parse_info()
         icons = parsed[1]
@@ -81,6 +77,6 @@ def discord_bot():
         print('Finished task. Closing...')
         await client.logout()
         return
-    client.run(token)
+    client.run(os.environ.get('TOKEN'))
 
 discord_bot()
