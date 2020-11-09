@@ -1,6 +1,7 @@
 import discord
 import requests
 import os
+import sys
 
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
@@ -59,7 +60,7 @@ def discord_bot():
         icons = parsed[1]
         backgrounds = parsed[0]
         if icons == [] and backgrounds == []:
-            await logchannel.send('No new IDs found. Try again later.')
+            await logchannel.send('No new IDs found.')
         else:
             for background in backgrounds:
                 folderid = background['folderid']
@@ -76,7 +77,7 @@ def discord_bot():
         await logchannel.send('Finished refreshing.')
         print('Finished task. Closing...')
         await client.logout()
-        return
+        sys.exit()
     client.run(os.environ.get('TOKEN'))
 
 discord_bot()
