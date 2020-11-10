@@ -1,6 +1,5 @@
 import discord
 import requests
-import os
 
 ##CONFIG
 token_config = ''
