@@ -2,6 +2,11 @@ import discord
 import requests
 import os
 
+##CONFIG
+token_config = ''
+log_channel_config = 
+id_channel_config = 
+
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
     save = []
@@ -52,8 +57,8 @@ def discord_bot():
     @client.event
     async def on_ready():
         print('We have logged in as {0.user}'.format(client))
-        idchannel = client.get_channel(int(os.environ.get('ID_CHANNEL')))
-        logchannel = client.get_channel(int(os.environ.get('LOG_CHANNEL')))
+        idchannel = client.get_channel(id_channel_config)
+        logchannel = client.get_channel(log_channel_config)
         await logchannel.send('Refreshing...')
         parsed = parse_info()
         icons = parsed[1]
@@ -67,16 +72,35 @@ def discord_bot():
                 imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/' + str(folderid) + '/' + str(linkid) + '.jpg'
                 embedVar = discord.Embed(title='ID: ' + str(linkid), description='Profile Background', color=0xE88DAF)
                 embedVar.set_image(url=imageurl)
+                embedVar.add_field(name = 'Custom Request:', value = 
+                '''
+                **API-Endpoint:** `/lol-summoner/v1/current-summoner/summoner-profile`
+                **Method:** `POST`
+                **Body:**
+                ```{
+"key": "backgroundSkinId",
+"value": ''' + str(linkid) + '''
+}```''', inline = False)
                 await idchannel.send(embed=embedVar)
             for icon in icons:
                 imageurl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/' + str(icon) + '.jpg'
                 embedVar = discord.Embed(title="ID: " + str(icon), description='Icon', color=0x00ff00)
                 embedVar.set_image(url=imageurl)
+                embedVar.add_field(name = 'Custom Request:', value = 
+                '''
+                **API-Endpoint:** `/lol-chat/v1/me`
+                **Method:** `PUT`
+                **Body:**
+                ```{
+"icon": ''' + str(icon) + '''
+}```''', inline = False)
                 await idchannel.send(embed=embedVar)
             await logchannel.send('Finished refreshing. See new IDs at ' + str(idchannel.mention))
         print('Finished task. Closing...')
         await client.logout()
         return
-    client.run(os.environ.get('TOKEN'))
+    client.run(token_config)
 
 discord_bot()
+
+
