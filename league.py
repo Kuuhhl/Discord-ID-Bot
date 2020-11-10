@@ -1,7 +1,6 @@
 import discord
 import requests
 import os
-import sys
 
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
@@ -74,10 +73,10 @@ def discord_bot():
                 embedVar = discord.Embed(title="ID: " + str(icon), description='Icon', color=0x00ff00)
                 embedVar.set_image(url=imageurl)
                 await idchannel.send(embed=embedVar)
-        await logchannel.send('Finished refreshing.')
+            await logchannel.send('Finished refreshing. See new IDs at ' + logchannel)
         print('Finished task. Closing...')
         await client.logout()
-        sys.exit()
+        return
     client.run(os.environ.get('TOKEN'))
 
 discord_bot()
