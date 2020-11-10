@@ -73,7 +73,7 @@ def discord_bot():
                 embedVar = discord.Embed(title="ID: " + str(icon), description='Icon', color=0x00ff00)
                 embedVar.set_image(url=imageurl)
                 await idchannel.send(embed=embedVar)
-            await logchannel.send('Finished refreshing. See new IDs at ' + str(logchannel.mention)))
+            await logchannel.send('Finished refreshing. See new IDs at ' + str(logchannel.mention))
         print('Finished task. Closing...')
         await client.logout()
         return
