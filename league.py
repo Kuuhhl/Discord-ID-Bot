@@ -1,10 +1,6 @@
 import discord
 import requests
-
-##CONFIG
-token_config = ''
-log_channel_config = 
-id_channel_config = 
+import os
 
 def get_links():
     text = requests.get('https://raw.communitydragon.org/latest/cdragon/files.exported.txt').text.splitlines()
@@ -56,15 +52,14 @@ def discord_bot():
     @client.event
     async def on_ready():
         print('We have logged in as {0.user}'.format(client))
-        idchannel = client.get_channel(id_channel_config)
-        logchannel = client.get_channel(log_channel_config)
-        await logchannel.send('Refreshing...')
+        idchannel = client.get_channel(int(os.environ.get('id_channel_config')))
         parsed = parse_info()
         icons = parsed[1]
         backgrounds = parsed[0]
         if icons == [] and backgrounds == []:
-            await logchannel.send('No new IDs found.')
+            pass
         else:
+            print('Posting into channel: #' + str(idchannel))
             for background in backgrounds:
                 folderid = background['folderid']
                 linkid = background['linkid']
@@ -94,12 +89,8 @@ def discord_bot():
 "icon": ''' + str(icon) + '''
 }```''', inline = False)
                 await idchannel.send(embed=embedVar)
-            await logchannel.send('Finished refreshing. See new IDs at ' + str(idchannel.mention))
         print('Finished task. Closing...')
         await client.logout()
         return
-    client.run(token_config)
-
+    client.run(os.environ.get('token_config'))
 discord_bot()
-
-
