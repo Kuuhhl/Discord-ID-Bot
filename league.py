@@ -32,6 +32,7 @@ def compare_links(allstuff, savefilepath):
         text = f.readlines()
     for line in text:
         oldstuff.append(line.strip())
+
     newstuff = []
     for link in allstuff:
         if link in oldstuff:
@@ -81,7 +82,9 @@ def discord_bot():
     @client.event
     async def on_ready():
         print("We have logged in as {0.user}".format(client))
-        idchannel = client.get_channel(int(config.channel_id))
+        print(config.channel_id)
+        print(type(config.channel_id))
+        idchannel = client.get_channel(config.channel_id)
         parsed = parse_info()
         icons = parsed[1]
         backgrounds = parsed[0]
@@ -130,7 +133,7 @@ def discord_bot():
                     title="ID: " + str(icon), description="Icon", color=0x00FF00
                 )
                 embedVar.set_image(url=imageurl)
-                embedVar.add_field(
+                cembedVar.add_field(
                     name="Custom Request:",
                     value="""
                 **API-Endpoint:** `/lol-chat/v1/me`
@@ -144,11 +147,19 @@ def discord_bot():
                     inline=False,
                 )
                 await idchannel.send(embed=embedVar)
-        print("Finished task. Closing...")
         await client.logout()
         return
 
     client.run(config.bot_token)
 
 
-discord_bot()
+savefile = os.path.join("savefile.txt")
+if os.path.isfile(savefile):
+    discord_bot()
+else:
+    print("No savefile found. \nCreating...")
+    with open(savefile, "w") as f:
+        f.write("")
+    compare_links(get_links(), savefile)
+
+print("Finished task. Closing...")
